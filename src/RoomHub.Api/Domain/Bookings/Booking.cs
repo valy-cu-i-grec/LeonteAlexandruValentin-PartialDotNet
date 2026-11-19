@@ -12,6 +12,9 @@ public enum BookingStatus
 public sealed class Booking
 {
     public static readonly TimeSpan MaxDuration = TimeSpan.FromHours(4);
+    public static readonly TimeSpan MaxDurationLargeRoom = TimeSpan.FromHours(2);
+    public const int LargeRoomCapacityThreshold = 10;
+    public static readonly TimeSpan MinCancelNotice = TimeSpan.FromMinutes(60);
     public const int MaxActivePerDay = 2;
 
     private Booking()
@@ -51,8 +54,16 @@ public sealed class Booking
         if (range.StartUtc < nowUtc)
             return BookingErrors.StartInPast;
 
-        if (range.Duration > MaxDuration)
+        // R10: rooms with capacity above 10 allow at most 2 hours, the others keep the 4-hour limit (R6).
+        if (room.Capacity > LargeRoomCapacityThreshold)
+        {
+            if (range.Duration > MaxDurationLargeRoom)
+                return BookingErrors.TooLongForLargeRoom;
+        }
+        else if (range.Duration > MaxDuration)
+        {
             return BookingErrors.TooLong;
+        }
 
         return new Booking
         {
@@ -72,10 +83,14 @@ public sealed class Booking
         && RoomId == other.RoomId
         && Range.Overlaps(other.Range);
 
-    public Result<Unit> Cancel()
+    public Result<Unit> Cancel(DateTime nowUtc)
     {
         if (Status == BookingStatus.Cancelled)
             return BookingErrors.AlreadyCancelled;
+
+        // R11: cancelling is allowed only if the booking starts at least 60 minutes from now.
+        if (Range.StartUtc - nowUtc < MinCancelNotice)
+            return BookingErrors.CancellationTooLate;
 
         Status = BookingStatus.Cancelled;
         return Unit.Value;

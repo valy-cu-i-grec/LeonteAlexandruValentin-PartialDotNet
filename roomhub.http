@@ -52,4 +52,135 @@ Content-Type: application/json
 ### 7. Cancel booking
 POST {{baseUrl}}/api/bookings/{{bookingId}}/cancel
 
-### 8. Add your own requests here for the rules in ASSIGNMENT.md
+### 8. Cancel the same booking again (expected: 409, R8)
+POST {{baseUrl}}/api/bookings/{{bookingId}}/cancel
+
+### 9. Booking in the past (expected: 400, R5)
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "ana",
+  "startUtc": "2020-01-10T10:00:00Z",
+  "endUtc": "2020-01-10T11:00:00Z",
+  "attendees": 4
+}
+
+### 10. Longer than 4 hours (expected: 400, R6)
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "ana",
+  "startUtc": "2030-01-10T08:00:00Z",
+  "endUtc": "2030-01-10T12:01:00Z",
+  "attendees": 4
+}
+
+### 11. Touching the interval of the cancelled booking (expected: 201, R7/R8)
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "carl",
+  "startUtc": "2030-01-10T10:00:00Z",
+  "endUtc": "2030-01-10T12:00:00Z",
+  "attendees": 4
+}
+
+### 12. Daily limit: first and second booking of "dora" (expected: 201 each, R9)
+# R9 counts across all rooms and the data survives restarts: to run this file again, delete src/RoomHub.Api/roomhub.db first.
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "dora",
+  "startUtc": "2030-01-11T08:00:00Z",
+  "endUtc": "2030-01-11T09:00:00Z",
+  "attendees": 2
+}
+
+###
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "dora",
+  "startUtc": "2030-01-11T10:00:00Z",
+  "endUtc": "2030-01-11T11:00:00Z",
+  "attendees": 2
+}
+
+### 13. Daily limit: third booking of "dora" on the same day (expected: 409, R9)
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "dora",
+  "startUtc": "2030-01-11T12:00:00Z",
+  "endUtc": "2030-01-11T13:00:00Z",
+  "attendees": 2
+}
+
+### 14. Large room: capacity 11
+# @name createLargeRoom
+POST {{baseUrl}}/api/rooms
+Content-Type: application/json
+
+{
+  "name": "Large room",
+  "capacity": 11
+}
+
+###
+@largeRoomId = {{createLargeRoom.response.body.$.id}}
+
+### 15. Large room, 3 hours (expected: 400, R10)
+POST {{baseUrl}}/api/rooms/{{largeRoomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "ana",
+  "startUtc": "2030-01-12T10:00:00Z",
+  "endUtc": "2030-01-12T13:00:00Z",
+  "attendees": 4
+}
+
+### 16. Large room, exactly 2 hours (expected: 201, R10)
+POST {{baseUrl}}/api/rooms/{{largeRoomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "ana",
+  "startUtc": "2030-01-12T10:00:00Z",
+  "endUtc": "2030-01-12T12:00:00Z",
+  "attendees": 4
+}
+
+### 17. Booking that starts in 30 minutes (expected: 201)
+# The relative time syntax is for the VS Code REST Client. In Rider, write the current UTC time + 30 min by hand.
+# @name createSoonBooking
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Content-Type: application/json
+
+{
+  "bookedBy": "eli",
+  "startUtc": "{{$datetime iso8601 30 m}}",
+  "endUtc": "{{$datetime iso8601 90 m}}",
+  "attendees": 2
+}
+
+###
+@soonBookingId = {{createSoonBooking.response.body.$.id}}
+
+### 18. Cancel it less than 60 minutes before the start (expected: 409, R11)
+POST {{baseUrl}}/api/bookings/{{soonBookingId}}/cancel
+
+### 19. Invalid room (expected: 400, R1)
+POST {{baseUrl}}/api/rooms
+Content-Type: application/json
+
+{
+  "name": "",
+  "capacity": 0
+}

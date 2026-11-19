@@ -22,4 +22,9 @@ Write down, in order, what you asked the AI. It is not a punishment: a missing o
 
 | Time (approx.) | What you asked (briefly) | What you kept | What you changed or rejected |
 |---|---|---|---|
-| _(fill in)_ | i-am cerut sa implementeze regulile din assigment.md | am pastrat codul asa cum a fost generat |  |
+| 10 minute | i-am cerut sa implementeze regulile din assigment.md | am pastrat codul asa cum a fost generat |  |
+
+
+| Time (approx.) | What you asked (briefly) | What you kept | What you changed or rejected |
+|---|---|---|---|
+| 3 minute | i-am cerut sa implementeze si noile cerinte, R9,10 si 11 | am pastrat codul generat |  |
