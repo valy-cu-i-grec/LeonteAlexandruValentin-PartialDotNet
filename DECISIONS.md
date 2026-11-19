@@ -44,9 +44,9 @@ Program.cs (MapBookings) -> BookingsEndpoints -> CreateBookingEndpoint.Handle
 ## 5. What you rejected from what the AI gave you
 Give a concrete example of code or an idea proposed by the AI that you corrected or rejected, and say why.
 
-_(your answer here)_
+Nu am respins bucati de cod, doar le-am verificat. Am pus la indoiala si am cerut explicatii pentru fiecare implementare pentru a ma asigua de corectitudine.
 
 ## 6. If you had 30 more minutes
 What would you improve and what risk did you leave in the project?
 
-_(your answer here)_
+As adauga teste automate, si as face R7 si R9 sa functioneze cu tranzactie
